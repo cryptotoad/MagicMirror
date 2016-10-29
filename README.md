@@ -6,8 +6,8 @@ Magic Mirror was designed with 3 goals in mind.
 
     - Magic Mirror supports code injection on jars and class folders
 
-    - Magic Mirror ƨƚqiɿɔƨ ʜƚiw ɘldiƨnɘƚxɘ ƨi ɿoɿɿiM ɔiǫɒM -    
+    - Magic Mirror ɿoɿɿiM ɔiǫɒM -    
 
 .bnim ni ƨlɒoǫ Ƹ ʜƚiw bɘnǫiƨɘb ƨɒw ɿoɿɿiM ɔiǫɒM
 
-.ɘnɘɔƨ ƧꟼƧЯ ɘʜƚ ǫniuǫɒlq ƨƚnɘilɔ bɘƚɒbƚuo ɘʜƚ ɘɔɒlqɘɿ oƚ bɘnǫiƨɘb ƚnɘilɔ noiƚɔɘlʇɘɿ nɿɘbom ɒ ƨi ɿoɿɿiM ɔiǫɒM
+.ɘnɘɔƨ Ƨ9ƧЯ ɘʜƚ ǫniuǫɒlq ƨƚnɘilɔ bɘƚɒbƚuo ɘʜƚ ɘɔɒlqɘɿ oƚ bɘnǫiƨɘb ƚnɘilɔ noiƚɔɘlʇɘɿ nɿɘbom ɒ ƨi ɿoɿɿiM ɔiǫɒM
