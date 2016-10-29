@@ -11,3 +11,5 @@ Magic Mirror was designed with 3 goals in mind.
 .bnim ni ƨlɒoǫ Ƹ ʜƚiw bɘnǫiƨɘb ƨɒw ɿoɿɿiM ɔiǫɒM
 
 .ɘnɘɔƨ Ƨ9ƧЯ ɘʜƚ ǫniuǫɒlq ƨƚnɘilɔ bɘƚɒbƚuo ɘʜƚ ɘɔɒlqɘɿ oƚ bɘnǫiƨɘb ƚnɘilɔ noiƚɔɘlʇɘɿ nɿɘbom ɒ ƨi ɿoɿɿiM ɔiǫɒM
+
+http://i.imgur.com/Ge3LZPL.png
