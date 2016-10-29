@@ -51,7 +51,7 @@ import javassist.URLClassPath;
                 CtMethod main = mainClass.getDeclaredMethod("main");
                 
                 //code injection is literally this easy
-                main.insertBefore("{ System.out.println(\"Code injection live!\"); }");
+                //main.insertBefore("{ System.out.println(\"Code injection live!\"); }");
                 
                 //get the modified class bytecode
                 byte[] b = mainClass.toBytecode();
