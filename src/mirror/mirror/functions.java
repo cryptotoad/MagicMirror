@@ -147,7 +147,7 @@ import magicmirror.ui.mainUI;
                     ClassLoader cl = new URLClassLoader(urls);
                     //now we want to load the classes from our name array into class objects to reflect, we don't want to just scan the main class!
                     for(int i=0; i<classNames.size(); i++) {
-                        System.out.println(classNames.get(i));
+                        //System.out.println(classNames.get(i));
                         Class tempClass = cl.loadClass(classNames.get(i));
                         classes.add(tempClass);
                         Method[] iMethods = tempClass.getDeclaredMethods();
@@ -155,12 +155,18 @@ import magicmirror.ui.mainUI;
                             allMethods[i][j] = iMethods[j];
                             allMethods[i][j].setAccessible(true); //duh
                         }
-                        
-                        Field[] iFields = tempClass.getDeclaredFields();
-                        for(int j=0; j<iFields.length; j++) {
-                            System.out.println(iFields[j].getName());
-                            allFields[i][j] = iFields[j];
-                            allFields[i][j].setAccessible(true); //duh
+                        Field[] iFields;
+                        if(tempClass != null){
+                            try {
+                            iFields = tempClass.getDeclaredFields();
+                            for(int j=0; j<iFields.length; j++) {
+                                //System.out.println(iFields[j].getName());
+                                allFields[i][j] = iFields[j];
+                                allFields[i][j].setAccessible(true); //duh
+                            }
+                            } catch(NoClassDefFoundError ex) {
+                                System.out.println("Bad class!");
+                            }
                         }
                         iFields = null;
                         iMethods = null;
