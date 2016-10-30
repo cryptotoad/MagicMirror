@@ -16,12 +16,16 @@ import javassist.*;
 import javassist.CtClass;
 import javassist.NotFoundException;
 import java.lang.ClassLoader;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
+import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import mirror.mirror.TextAreaOutputStream;
+import static mirror.mirror.functions.scanInt;
 /**
  *
  * @author Machiavelli
@@ -98,11 +102,11 @@ public class mainUI extends javax.swing.JFrame {
         tValue = new javax.swing.JTextField();
         cHex = new javax.swing.JCheckBox();
         jLabel11 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        jButton1 = new javax.swing.JButton();
+        cbType = new javax.swing.JComboBox<>();
+        bScan = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        tblResults = new javax.swing.JTable();
         jCheckBox2 = new javax.swing.JCheckBox();
         jLabel12 = new javax.swing.JLabel();
         jComboBox2 = new javax.swing.JComboBox<>();
@@ -447,14 +451,19 @@ public class mainUI extends javax.swing.JFrame {
 
         jLabel11.setText("Type");
 
-        jComboBox1.setEditable(true);
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "String", "int", "long" }));
+        cbType.setEditable(true);
+        cbType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "int", "String", "long" }));
 
-        jButton1.setText("Initial Scan");
+        bScan.setText("Initial Scan");
+        bScan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bScanActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("Refining Scan");
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        tblResults.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -462,7 +471,7 @@ public class mainUI extends javax.swing.JFrame {
                 "Field Name", "Field Type", "Field Value"
             }
         ));
-        jScrollPane5.setViewportView(jTable2);
+        jScrollPane5.setViewportView(tblResults);
 
         jCheckBox2.setText("Any");
 
@@ -498,7 +507,7 @@ public class mainUI extends javax.swing.JFrame {
                             .addGroup(jPanel4Layout.createSequentialGroup()
                                 .addComponent(jLabel11)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(cbType, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel4Layout.createSequentialGroup()
                                 .addComponent(jLabel10)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -514,7 +523,7 @@ public class mainUI extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 340, Short.MAX_VALUE)
-                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(bScan, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))))
@@ -530,13 +539,13 @@ public class mainUI extends javax.swing.JFrame {
                     .addComponent(jLabel10)
                     .addComponent(tValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cHex)
-                    .addComponent(jButton1)
+                    .addComponent(bScan)
                     .addComponent(jLabel12)
                     .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton3)
                     .addComponent(jCheckBox2))
                 .addGap(18, 18, 18)
@@ -621,6 +630,19 @@ public class mainUI extends javax.swing.JFrame {
         
     }//GEN-LAST:event_bSaveConfigActionPerformed
 
+    private void bScanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bScanActionPerformed
+        try {
+            DefaultTableModel model = (DefaultTableModel) tblResults.getModel();
+            List<Field> results = scanInt(Integer.parseInt(tValue.getText()));
+            for(Field iField: results) {
+                model.addRow(new Object[]{iField.getDeclaringClass().getName() + "." + iField.getName(),  cbType.getSelectedItem().toString(), tValue.getText()});
+            }
+            
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(mainUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_bScanActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -669,6 +691,7 @@ public class mainUI extends javax.swing.JFrame {
     private javax.swing.JButton bLoadConfig;
     private javax.swing.JButton bRun;
     private javax.swing.JButton bSaveConfig;
+    private javax.swing.JButton bScan;
     private javax.swing.JButton bStart;
     private javax.swing.JButton bStop;
     private javax.swing.JCheckBox cExec;
@@ -676,13 +699,12 @@ public class mainUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox cInject;
     private javax.swing.JCheckBox cLocal;
     private javax.swing.JCheckBox cReflectLocally;
+    private javax.swing.JComboBox<String> cbType;
     private javax.swing.JComboBox<String> dConfig;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox2;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -724,7 +746,6 @@ public class mainUI extends javax.swing.JFrame {
     private javax.swing.JTabbedPane jTabbedPane2;
     private javax.swing.JTabbedPane jTabbedPane3;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
     private javax.swing.JTable jTable3;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
@@ -735,5 +756,6 @@ public class mainUI extends javax.swing.JFrame {
     private javax.swing.JTextField tValue;
     private javax.swing.JTable tblFields;
     private javax.swing.JTable tblFields1;
+    private javax.swing.JTable tblResults;
     // End of variables declaration//GEN-END:variables
 }
