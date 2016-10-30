@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package magicmirror.ui;
+package mirror.mirror;
 
 import java.util.logging.Level;
 import mirror.mirror.JarHandler;
@@ -23,11 +23,12 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import javassist.ClassPath;
 import javassist.URLClassPath;
+import magicmirror.ui.mainUI;
 /**
  *
  * @author Machiavelli
  */
-    public class UIFunctions {
+    public class functions {
         private static Method[] methods = null;
         private static Field[] fields = null;
         
