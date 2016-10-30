@@ -615,6 +615,8 @@ public class mainUI extends javax.swing.JFrame {
                 Logger.getLogger(mainUI.class.getName()).log(Level.SEVERE, null, ex);
             } catch (InvocationTargetException ex) {
                 Logger.getLogger(mainUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InstantiationException ex) {
+                Logger.getLogger(mainUI.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             

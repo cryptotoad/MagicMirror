@@ -37,10 +37,12 @@ import magicmirror.ui.mainUI;
     public class functions 
     {
 
-        private static Class mainClazz = null;
+        private static Class mainClazz;
+        private static Object mainInstance;
         private static Method[] methods = new Method[3000];
         private static Field[] fields = new Field[3000];
         private static List<Class> classes = new ArrayList<>();
+        private static List<Field> instances = new ArrayList<>();
 
         public static Method[][] allMethods = new Method[1500][3000];
         public static Field[][] allFields = new Field[1500][3000];
@@ -77,6 +79,7 @@ import magicmirror.ui.mainUI;
         
         public static List<Field> scanInt(int scanVal) {
             List<Field> returnVal = new ArrayList<>();
+            
             int index = 0;
             for (Field[] allField : allFields) {
                 for (Field allField1 : allField) {
@@ -86,16 +89,21 @@ import magicmirror.ui.mainUI;
                     if(allField1.getType() == int.class) {
                         allField1.setAccessible(true);
                         try {
-                        if(allField1.getInt(classes.get(index)) == scanVal) { //i get better results using newinstance, but it fucks the everything
+                        if(allField1.getInt(mainInstance) == scanVal) { //i get better results using newinstance, but it fucks the everything
                             returnVal.add(allField1);
                         } 
                         }catch (Exception ex) {
                             try {
-                                if(allField1.getInt(mainClazz) == scanVal) { //i get better results using newinstance, but it fucks the everything
-                                    returnVal.add(allField1);
-                                } 
+                                Constructor[] constructors = allField1.getDeclaringClass().getDeclaredConstructors();
+                                if(constructors[0] != null) {
+                                    constructors[0].setAccessible(true);
+                                    if(allField1.getInt(constructors[0].newInstance()) == scanVal) { //i get better results using newinstance, but it fucks the everything
+                                        returnVal.add(allField1);
+                                    } 
+                                }
                             } catch (Exception ex2) {
                                 System.out.println("Something REALLY fucked up");
+                                ex2.printStackTrace();
                             }
                         }
                     }
@@ -118,7 +126,7 @@ import magicmirror.ui.mainUI;
             return classNames;
         }
 
-        public void startClient(String cPath, String mC) throws MalformedURLException, IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        public void startClient(String cPath, String mC) throws MalformedURLException, IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
                 try {
                     List<String> classNames = getClassNames(cPath);
                     System.out.println(classNames.toString());
@@ -150,6 +158,7 @@ import magicmirror.ui.mainUI;
                         //System.out.println(classNames.get(i));
                         Class tempClass = cl.loadClass(classNames.get(i));
                         classes.add(tempClass);
+                        //instances.add(tempClass.newInstance());
                         Method[] iMethods = tempClass.getDeclaredMethods();
                         for(int j=0; j<iMethods.length; j++) {
                             allMethods[i][j] = iMethods[j];
@@ -194,8 +203,10 @@ import magicmirror.ui.mainUI;
                     mainClazz = cl.loadClass(mC);
                     methods = mainClazz.getMethods();
                     fields = mainClazz.getFields();
+                    mainInstance = mainClazz.newInstance();
                     Method invokeMe = getMethod("main");
-                    invokeMe.invoke(mainClazz, new Object[] { new String[] { "a", "a" } });
+                    
+                    invokeMe.invoke(mainInstance, new Object[] { new String[] { "a", "a" } });
 
 
                 } catch (NotFoundException ex) {
