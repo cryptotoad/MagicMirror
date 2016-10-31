@@ -20,12 +20,14 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.prefs.Preferences;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import mirror.mirror.TextAreaOutputStream;
-import static mirror.mirror.functions.scanInt;
+import static mirror.mirror.functions.*;
 /**
  *
  * @author Machiavelli
@@ -56,6 +58,10 @@ public class mainUI extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jMenu5 = new javax.swing.JMenu();
+        mnuTable = new javax.swing.JPopupMenu();
+        mnuSave = new javax.swing.JMenuItem();
+        mnuChange = new javax.swing.JMenuItem();
+        mnuClear = new javax.swing.JMenuItem();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
         bRun = new javax.swing.JButton();
@@ -111,7 +117,7 @@ public class mainUI extends javax.swing.JFrame {
         jLabel12 = new javax.swing.JLabel();
         jComboBox2 = new javax.swing.JComboBox<>();
         jScrollPane6 = new javax.swing.JScrollPane();
-        jTable3 = new javax.swing.JTable();
+        tblSaved = new javax.swing.JTable();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
         jMenuBar2 = new javax.swing.JMenuBar();
@@ -141,6 +147,31 @@ public class mainUI extends javax.swing.JFrame {
         jScrollPane1.setViewportView(jTable1);
 
         jMenu5.setText("jMenu5");
+
+        mnuSave.setText("Save Value");
+        mnuSave.setToolTipText("");
+        mnuSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuSaveActionPerformed(evt);
+            }
+        });
+        mnuTable.add(mnuSave);
+
+        mnuChange.setText("Change Value");
+        mnuChange.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuChangeActionPerformed(evt);
+            }
+        });
+        mnuTable.add(mnuChange);
+
+        mnuClear.setText("Clear List");
+        mnuClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuClearActionPerformed(evt);
+            }
+        });
+        mnuTable.add(mnuClear);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -471,6 +502,11 @@ public class mainUI extends javax.swing.JFrame {
                 "Field Name", "Field Type", "Field Value"
             }
         ));
+        tblResults.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                tblResultsMouseReleased(evt);
+            }
+        });
         jScrollPane5.setViewportView(tblResults);
 
         jCheckBox2.setText("Any");
@@ -479,7 +515,7 @@ public class mainUI extends javax.swing.JFrame {
 
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Exact Value", "Changed Value", "Unchanged Value", "Unknown Value" }));
 
-        jTable3.setModel(new javax.swing.table.DefaultTableModel(
+        tblSaved.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -487,7 +523,7 @@ public class mainUI extends javax.swing.JFrame {
                 "Field Name", "Field Type", "Field Value"
             }
         ));
-        jScrollPane6.setViewportView(jTable3);
+        jScrollPane6.setViewportView(tblSaved);
 
         jLabel13.setText("Scan Results");
 
@@ -645,6 +681,51 @@ public class mainUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_bScanActionPerformed
 
+    private void tblResultsMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblResultsMouseReleased
+        if (evt.isPopupTrigger())
+        {
+            JTable source = (JTable)evt.getSource();
+            int row = source.rowAtPoint( evt.getPoint() );
+            int column = source.columnAtPoint( evt.getPoint() );
+
+            if (! source.isRowSelected(row))
+                source.changeSelection(row, column, false, false);
+
+            mnuTable.show(evt.getComponent(), evt.getX(), evt.getY());
+        }
+    }//GEN-LAST:event_tblResultsMouseReleased
+
+    private void mnuSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSaveActionPerformed
+        if(tblResults.getSelectedRowCount() > 0) {    
+            int[] selectedRows = tblResults.getSelectedRows();
+            DefaultTableModel model = (DefaultTableModel) tblSaved.getModel();
+            for (int i = 0; i < selectedRows.length; i++) { 
+                String[] Columns = new String[tblResults.getColumnCount()];
+                
+                for (int j = 0; j < tblResults.getColumnCount(); j++) {
+                    Columns[j] = (String) tblResults.getValueAt(tblResults.convertRowIndexToModel(selectedRows[i]),tblResults.convertColumnIndexToModel(j));
+                }
+                
+                model.addRow(Columns);
+        }
+        }
+    }//GEN-LAST:event_mnuSaveActionPerformed
+
+    private void mnuChangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuChangeActionPerformed
+       if(tblResults.getSelectedRowCount() > 0) {    
+            int[] selectedRows = tblResults.getSelectedRows();
+            String FQDN = (String) tblResults.getValueAt(tblResults.convertRowIndexToModel(selectedRows[0]),tblResults.convertColumnIndexToModel(0));
+            String prompt = (String)JOptionPane.showInputDialog("Int value");
+            setIntField(FQDN, Integer.parseInt(prompt));
+
+        }
+    }//GEN-LAST:event_mnuChangeActionPerformed
+
+    private void mnuClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuClearActionPerformed
+        DefaultTableModel model = (DefaultTableModel) tblResults.getModel();
+        model.setRowCount(0);
+    }//GEN-LAST:event_mnuClearActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -748,9 +829,12 @@ public class mainUI extends javax.swing.JFrame {
     private javax.swing.JTabbedPane jTabbedPane2;
     private javax.swing.JTabbedPane jTabbedPane3;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable3;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
+    private javax.swing.JMenuItem mnuChange;
+    private javax.swing.JMenuItem mnuClear;
+    private javax.swing.JMenuItem mnuSave;
+    private javax.swing.JPopupMenu mnuTable;
     private javax.swing.JTextField tClientURL;
     private javax.swing.JTextField tCommand;
     private javax.swing.JTextArea tLog;
@@ -759,5 +843,6 @@ public class mainUI extends javax.swing.JFrame {
     private javax.swing.JTable tblFields;
     private javax.swing.JTable tblFields1;
     private javax.swing.JTable tblResults;
+    private javax.swing.JTable tblSaved;
     // End of variables declaration//GEN-END:variables
 }
