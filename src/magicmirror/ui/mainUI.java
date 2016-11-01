@@ -18,6 +18,7 @@ import javassist.NotFoundException;
 import java.lang.ClassLoader;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
@@ -110,7 +111,7 @@ public class mainUI extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         cbType = new javax.swing.JComboBox<>();
         bScan = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        btnRefine = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
         tblResults = new javax.swing.JTable();
         jCheckBox2 = new javax.swing.JCheckBox();
@@ -492,7 +493,12 @@ public class mainUI extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setText("Refining Scan");
+        btnRefine.setText("Refining Scan");
+        btnRefine.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefineActionPerformed(evt);
+            }
+        });
 
         tblResults.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -562,7 +568,7 @@ public class mainUI extends javax.swing.JFrame {
                                 .addComponent(bScan, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(btnRefine, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addComponent(jLabel13)
                     .addComponent(jLabel14))
                 .addContainerGap())
@@ -582,7 +588,7 @@ public class mainUI extends javax.swing.JFrame {
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
                     .addComponent(cbType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton3)
+                    .addComponent(btnRefine)
                     .addComponent(jCheckBox2))
                 .addGap(18, 18, 18)
                 .addComponent(jLabel13)
@@ -726,6 +732,20 @@ public class mainUI extends javax.swing.JFrame {
         model.setRowCount(0);
     }//GEN-LAST:event_mnuClearActionPerformed
 
+    private void btnRefineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefineActionPerformed
+        List<String> FQDNs = new ArrayList<String>();
+        for(int i=0;i<tblResults.getRowCount();i++) {
+            String FQDN = (String) tblResults.getValueAt(tblResults.convertRowIndexToModel(i),tblResults.convertColumnIndexToModel(0));
+            FQDNs.add(FQDN);
+        }
+        List<Field> reScanResults = reScanInt(Integer.parseInt(tValue.getText()), FQDNs);
+        DefaultTableModel model = (DefaultTableModel) tblResults.getModel();
+        model.setRowCount(0);
+        for(Field iField: reScanResults) {
+            model.addRow(new Object[]{iField.getDeclaringClass().getName() + "." + iField.getName(),  cbType.getSelectedItem().toString(), tValue.getText()});
+        }
+    }//GEN-LAST:event_btnRefineActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -777,6 +797,7 @@ public class mainUI extends javax.swing.JFrame {
     private javax.swing.JButton bScan;
     private javax.swing.JButton bStart;
     private javax.swing.JButton bStop;
+    private javax.swing.JButton btnRefine;
     private javax.swing.JCheckBox cExec;
     private javax.swing.JCheckBox cHex;
     private javax.swing.JCheckBox cInject;
@@ -785,7 +806,6 @@ public class mainUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cbType;
     private javax.swing.JComboBox<String> dConfig;
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JComboBox<String> jComboBox2;

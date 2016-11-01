@@ -67,6 +67,29 @@ import magicmirror.ui.mainUI;
             }
             return null;
         }
+        
+        public static Field getField(String FQDN) {
+            String className = "";
+            String[] parts = FQDN.split("\\.");
+            String fieldName = parts[parts.length - 1];
+            
+            for(int i=0; i<parts.length-1;i++) {
+                className += parts[i];
+                System.out.println(className);
+                if(i<parts.length-2) {
+                    className += ".";
+                }
+            }
+            
+            int classId = getClassId(className);
+             for (int i = 0; i < allFields[classId].length; i++) {
+                if (allFields[classId][i].getName().equals(fieldName)) 
+                {
+                    return allFields[classId][i];
+                }
+            }
+            return null;
+        }
 
         public static Class getClass(String s) {
             for (int i = 0; i < classes.size(); i++) {
@@ -91,9 +114,8 @@ import magicmirror.ui.mainUI;
         public static void setIntField(String FQDN, int Value) {
             String className = "";
             String[] parts = FQDN.split("\\.");
-            System.out.println(FQDN);
-            System.out.println(parts.length);
             String fieldName = parts[parts.length - 1];
+            
             for(int i=0; i<parts.length-1;i++) {
                 className += parts[i];
                 System.out.println(className);
@@ -101,7 +123,6 @@ import magicmirror.ui.mainUI;
                     className += ".";
                 }
             }
-            System.out.println(className);
             
             Class fieldContainer = classes.get(getClassId(className));
                  try {
@@ -155,6 +176,37 @@ import magicmirror.ui.mainUI;
                 }
                 index++;
             }
+            return returnVal;
+        }
+        
+        public static List<Field> reScanInt(int scanVal, List<String> FQDN) 
+        {
+            List<Field> returnVal = new ArrayList<>();
+            
+            int index = 0;
+            for (String targetField : FQDN) {
+                try {
+                        if(getField(targetField).getInt(mainInstance) == scanVal) { //i get better results using newinstance, but it fucks the everything
+                            returnVal.add(getField(targetField));
+                        } 
+                        }catch (Exception ex) {
+                            try {
+                                Constructor[] constructors = getField(targetField).getDeclaringClass().getDeclaredConstructors();
+                                if(constructors.length > 0) {
+                                    constructors[0].setAccessible(true);
+                                    if(getField(targetField).getInt(constructors[0].newInstance()) == scanVal) { //i get better results using newinstance, but it fucks the everything
+                                        returnVal.add(getField(targetField));
+                                    } 
+                                }
+                            } catch (java.lang.IllegalArgumentException ex2) {
+                                System.out.println("Unable to reprocess field " + getField(targetField).getName() + " in class " + getField(targetField).getDeclaringClass());
+                                //ex2.printStackTrace();
+                            } catch (Exception ex2) {
+                                ex2.printStackTrace();
+                            }                   
+                        }
+            }
+            
             return returnVal;
         }
         
