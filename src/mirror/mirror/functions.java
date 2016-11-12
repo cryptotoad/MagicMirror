@@ -141,6 +141,40 @@ import magicmirror.ui.mainUI;
             
         }
         
+        public static void setStrField(String FQDN, String Value) {
+            String className = "";
+            String[] parts = FQDN.split("\\.");
+            String fieldName = parts[parts.length - 1];
+            
+            for(int i=0; i<parts.length-1;i++) {
+                className += parts[i];
+                System.out.println(className);
+                if(i<parts.length-2) {
+                    className += ".";
+                }
+            }
+            
+            Class fieldContainer = classes.get(getClassId(className));
+                 try {
+                    Constructor[] constructors = fieldContainer.getDeclaredConstructors();
+                        constructors[0].setAccessible(true);
+                        try {
+                            getField(className, fieldName).setAccessible(true);
+                            getField(className, fieldName).set(mainInstance, (Object) Value);
+                        } catch(Exception ex) {
+                            getField(className, fieldName).setAccessible(true);
+                            getField(className, fieldName).set(constructors[0].newInstance(), (Object) Value);
+                        }
+                } catch (Exception ex2) {
+                    ex2.printStackTrace();
+                }
+            
+        }
+        
+        /*
+        Scanning Functions begin below
+        */
+        
         public static List<Field> scanInt(int scanVal) {
             List<Field> returnVal = new ArrayList<>();
             
@@ -159,12 +193,20 @@ import magicmirror.ui.mainUI;
                         }catch (Exception ex) {
                             try {
                                 Constructor[] constructors = allField1.getDeclaringClass().getDeclaredConstructors();
-                                if(constructors.length > 0) {
-                                    constructors[0].setAccessible(true);
-                                    if(allField1.getInt(constructors[0].newInstance()) == scanVal) { //i get better results using newinstance, but it fucks the everything
-                                        returnVal.add(allField1);
-                                    } 
-                                }
+                                    int noArgs = -1;
+                                    if(constructors.length > 0) {
+                                        for(int ii = 0;  ii < constructors.length; ii++) {
+                                            if(constructors[ii].getGenericParameterTypes().length == 0)
+                                                noArgs = ii;
+                                                break;
+                                        }
+                                        if(noArgs != -1) {
+                                            constructors[noArgs].setAccessible(true);
+                                            if(allField1.getInt(constructors[noArgs].newInstance()) == scanVal) { //i get better results using newinstance, but it fucks the everything
+                                            returnVal.add(allField1);
+                                            } 
+                                        }
+                                    }
                             } catch (java.lang.IllegalArgumentException ex2) {
                                 System.out.println("Unable to process field " + allField1.getName() + " in class " + allField1.getDeclaringClass());
                                 //ex2.printStackTrace();
@@ -176,6 +218,75 @@ import magicmirror.ui.mainUI;
                 }
                 index++;
             }
+            return returnVal;
+        }
+        
+        public static List<Field> scanStr(String scanVal, int scanType) {
+            
+            List<Field> returnVal = new ArrayList<>();
+            
+            int index = 0;
+            for (Field[] allField : allFields) {
+                for (Field allField1 : allField) {
+                    if(allField1 == null)
+                       break;
+                    
+                    if(allField1.getType() == String.class) {
+                        allField1.setAccessible(true);
+                        try {
+                        if(scanType != 1) {
+                            if(allField1.get(mainInstance).toString().contains(scanVal)) { //i get better results using newinstance, but it fucks the everything
+                                returnVal.add(allField1);
+                            } 
+                        } else {
+                            if(allField1.get(mainInstance).toString().equalsIgnoreCase(scanVal)) { //i get better results using newinstance, but it fucks the everything
+                                returnVal.add(allField1);
+                            } 
+                        }
+                        }catch (Exception ex) {
+                            //ex.printStackTrace();
+                            try {
+                                Constructor[] constructors = allField1.getDeclaringClass().getDeclaredConstructors();
+                                if(constructors.length > 0) {
+                                    int noArgs = -1;
+                                    for(int ii = 0;  ii < constructors.length; ii++) {
+                                        if(constructors[ii].getGenericParameterTypes().length == 0) {
+                                            noArgs = ii;
+                                            break;
+                                        }
+                                    }
+                                    if(noArgs != -1) {
+                                        constructors[noArgs].setAccessible(true);
+                                        
+                                        Object fieldVal1 = allField1.get(constructors[noArgs].newInstance());
+                                        if(fieldVal1 == null) {
+                                            break;
+                                        }
+                                        String fieldVal = fieldVal1.toString();
+                                        if(scanType != 1) {
+                                            if(fieldVal.equalsIgnoreCase(scanVal)) { //i get better results using newinstance, but it fucks the everything
+                                                returnVal.add(allField1);
+                                            } 
+                                        } else {
+                                            if(fieldVal.contains(scanVal)) { //i get better results using newinstance, but it fucks the everything
+                                                returnVal.add(allField1);
+                                            }    
+                                        }
+                                    }
+                                }
+                            } catch (java.lang.IllegalArgumentException ex2) {
+                                System.out.println("Unable to process field " + allField1.getName() + " in class " + allField1.getDeclaringClass() + " Due to Illegal Argument Exception");
+                                //ex2.printStackTrace();
+                            } catch (Exception ex2) {
+                                System.out.println("Unable to process field " + allField1.getName() + " in class " + allField1.getDeclaringClass() + " Due to an " + ex2.getLocalizedMessage());
+                                ex2.printStackTrace();
+                            }
+                        }
+                    }
+                }
+                index++;
+            }
+            //System.out.println(scanType);
             return returnVal;
         }
         
@@ -252,14 +363,23 @@ import magicmirror.ui.mainUI;
                     ClassLoader cl = new URLClassLoader(urls);
                     //now we want to load the classes from our name array into class objects to reflect, we don't want to just scan the main class!
                     for(int i=0; i<classNames.size(); i++) {
+                        Method[] iMethods;
+                        Class tempClass;
+                        try{
                         //System.out.println(classNames.get(i));
-                        Class tempClass = cl.loadClass(classNames.get(i));
+                        tempClass = cl.loadClass(classNames.get(i));
                         classes.add(tempClass);
                         //instances.add(tempClass.newInstance());
-                        Method[] iMethods = tempClass.getDeclaredMethods();
+                        
+                        
+                        iMethods = tempClass.getDeclaredMethods();
                         for(int j=0; j<iMethods.length; j++) {
                             allMethods[i][j] = iMethods[j];
                             allMethods[i][j].setAccessible(true); //duh
+                        }
+                        } catch(NoClassDefFoundError ex) {
+                               System.out.println("Bad class!");
+                               tempClass = null;
                         }
                         Field[] iFields;
                         if(tempClass != null){
@@ -302,8 +422,8 @@ import magicmirror.ui.mainUI;
                     fields = mainClazz.getFields();
                     mainInstance = mainClazz.newInstance();
                     Method invokeMe = getMethod("main");
-                    
-                    invokeMe.invoke(mainInstance, new Object[] { new String[] { "a", "a" } });
+                    invokeMe.setAccessible(true);
+                    invokeMe.invoke(mainInstance, new Object[] { new String[] { null } });
 
 
                 } catch (NotFoundException ex) {
