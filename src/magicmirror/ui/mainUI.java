@@ -745,6 +745,8 @@ public class mainUI extends javax.swing.JFrame {
             String prompt = (String)JOptionPane.showInputDialog(varType + " value");
             if(varType.equalsIgnoreCase("int")) {
                 setIntField(FQDN, Integer.parseInt(prompt));
+            }if(varType.equalsIgnoreCase("long")) {
+                setLongField(FQDN, Long.parseLong(prompt));
             } else if(varType.equalsIgnoreCase("string")) {
                 setStrField(FQDN, prompt);
             }

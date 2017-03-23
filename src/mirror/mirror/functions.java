@@ -110,7 +110,35 @@ import magicmirror.ui.mainUI;
             }
             return -1;
        }
-        
+            public static void setLongField(String FQDN, long Value) {
+            String className = "";
+            String[] parts = FQDN.split("\\.");
+            String fieldName = parts[parts.length - 1];
+            
+            for(int i=0; i<parts.length-1;i++) {
+                className += parts[i];
+                System.out.println(className);
+                if(i<parts.length-2) {
+                    className += ".";
+                }
+            }
+            
+            Class fieldContainer = classes.get(getClassId(className));
+                 try {
+                    Constructor[] constructors = fieldContainer.getDeclaredConstructors();
+                        constructors[0].setAccessible(true);
+                        try {
+                            getField(className, fieldName).setAccessible(true);
+                            getField(className, fieldName).set(mainInstance, (Object) Value);
+                        } catch(Exception ex) {
+                            getField(className, fieldName).setAccessible(true);
+                            getField(className, fieldName).set(constructors[0].newInstance(), (Object) Value);
+                        }
+                } catch (Exception ex2) {
+                    ex2.printStackTrace();
+                }
+            
+        }    
         public static void setIntField(String FQDN, int Value) {
             String className = "";
             String[] parts = FQDN.split("\\.");
