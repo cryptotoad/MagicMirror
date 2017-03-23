@@ -321,6 +321,18 @@ import magicmirror.ui.mainUI;
             return returnVal;
         }
         
+        public static Class[] classListToArray(List<Class> Params) {
+            Object[] intermediary = Params.toArray();
+            Class[] returnClasses = new Class[intermediary.length];
+            int i = 0;
+            for(Object myClass : intermediary) {
+                returnClasses[i] = (Class) myClass;
+                i++;
+            }
+            i = 0;
+            return returnClasses;
+        }
+        
         public static List<String> getClassNames(String pathToJar) throws FileNotFoundException, IOException {
             List<String> classNames = new ArrayList<String>();
             ZipInputStream zip = new ZipInputStream(new FileInputStream(pathToJar));
@@ -333,9 +345,48 @@ import magicmirror.ui.mainUI;
             }
             return classNames;
         }
-
-        public void startClient(String cPath, String mC) throws MalformedURLException, IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        public void startClient(String cPath, String mC, String mM) {
+            try {
+                startClient(cPath, mC, mM, null);
+            } catch (IOException ex) {
+                Logger.getLogger(functions.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(functions.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchMethodException ex) {
+                Logger.getLogger(functions.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(functions.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(functions.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InstantiationException ex) {
+                Logger.getLogger(functions.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        public void startClient(String cPath, String mC, String mM, String cA) throws MalformedURLException, IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
                 try {
+                    List<Object> argsOut = new ArrayList<Object>();
+                    List<Class> varTypes = new ArrayList<Class>();
+                    if(cA != null) {
+                        String[] conArgs = cA.split(",");
+                        for(String arg1 : conArgs) {
+                            String[] args1 = arg1.split(":");
+                            String type = args1[0];
+                            String value = args1[1];
+                            if(type.equalsIgnoreCase("int")) {
+                                argsOut.add(Integer.parseInt(value));
+                                varTypes.add(int.class);
+                            }else if(type.equalsIgnoreCase("string")) {
+                                argsOut.add(value);
+                                varTypes.add(java.lang.String.class);
+                            }else if(type.equalsIgnoreCase("long")) {
+                                argsOut.add(Long.parseLong(value));
+                                varTypes.add(long.class);
+                            }else if(type.equalsIgnoreCase("boolean")) {
+                                argsOut.add(Boolean.parseBoolean(value));
+                                varTypes.add(boolean.class);
+                            }
+                        }
+                    }
                     List<String> classNames = getClassNames(cPath);
                     System.out.println(classNames.toString());
                     File cFile = new File(cPath);
@@ -343,7 +394,7 @@ import magicmirror.ui.mainUI;
                     //add out classpath, and save it so we can reference it later
                     ClassPath cp = mirror.MagicMirror.reflectingPool.appendClassPath(cPath); 
                     CtClass mainClass = mirror.MagicMirror.reflectingPool.get(mC);
-                    CtMethod main = mainClass.getDeclaredMethod("main");
+                    CtMethod main = mainClass.getDeclaredMethod(mM);
 
                     //code injection is literally this easy
                     //main.insertBefore("{ System.out.println(\"Code injection live!\"); }");
@@ -416,12 +467,21 @@ import magicmirror.ui.mainUI;
                         iFields = null;
                     }*/
 
-                    //Let's finally get our main method ready to go. We've already called setAccessible, so let's just do it!
+                    //Let's finally get our main method ready to go!
                     mainClazz = cl.loadClass(mC);
                     methods = mainClazz.getMethods();
                     fields = mainClazz.getFields();
-                    mainInstance = mainClazz.newInstance();
-                    Method invokeMe = getMethod("main");
+                    
+                    try {
+                        mainInstance = mainClazz.newInstance();
+                    } catch (Exception exodia) {
+                        if(cA != null)
+                            mainInstance = mainClazz.getConstructor(classListToArray(varTypes)).newInstance(argsOut.toArray());
+                        else
+                            System.out.println("Error: No-Args constructor not found! Please verify constructor arguments box is checked!");
+                    }
+                    
+                    Method invokeMe = getMethod(mM);
                     invokeMe.setAccessible(true);
                     invokeMe.invoke(mainInstance, new Object[] { new String[] { null } });
 
